@@ -1,6 +1,7 @@
 #! /usr/bin/env pypy3
 # -*- coding: utf-8 -*-
 
+import asyncio
 from quart import Quart
 
 app = Quart(__name__)
@@ -11,4 +12,5 @@ async def hello():
     return "<p>Hello, world!</p>"
 
 
-app.run()
+if __name__ == "__main__":
+    asyncio.run(app.run_task())
