@@ -1,7 +1,7 @@
 """
 SmallParserService.
 
-Quart async web service to run the SmallParser application from GCP.
+Flask web service to run the SmallParser application from GCP.
 """
 
 import os
@@ -18,13 +18,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-@app.route("/hello/<name>")
-def index(name=None):
-    """Landing page for test application."""
-    return render_template('hello.html', name=name)
-
-
-@app.route('/upload_file/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def upload_file():
     """Upload a file to the server."""
     if request.method == 'POST':
@@ -49,4 +43,4 @@ def allowed_file(f: str) -> bool:
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
