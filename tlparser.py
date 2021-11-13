@@ -3,6 +3,7 @@
 
 import argparse
 import os
+import sys
 
 
 def valid_date(d: str) -> bool:
@@ -25,6 +26,7 @@ def valid_date(d: str) -> bool:
 
 
 def valid_time(t: str) -> bool:
+    """Check if token is a valid time"""
     if not t[0].isdigit():
         return False
     if t.startswith("0"):
@@ -88,7 +90,8 @@ def parse_line(line: str):
 
 
 def parse_log(filename: str):
-    lines = open(filename).readlines()
+    with open(filename) as f:
+        lines = f.readlines()
     if lines[0].lower().strip() != "time log:":
         return -1
     time_record = []
@@ -147,24 +150,29 @@ def longest_task(records):
 
 
 def argparser():
+    """Set up argument parser."""
     ap = argparse.ArgumentParser()
     ap.add_argument("filename", type=str, help="Log file to parse")
     return ap
 
 
-def main():
-    ap = argparser().parse_args()
-    if os.path.exists(os.path.abspath(ap.filename)):
-        records, total_time = parse_log(ap.filename)
-        h, m = divmod(total_time, 60)
-        print(f"Total time spent: {h} hours and {m} minutes")
-        h, m = divmod(total_time // len(records), 60)
-        print(f"Average time spent per day: {h} hours and {m} minutes")
-        maxtime, task = longest_task(records)
-        h, m = divmod(maxtime, 60)
-        print(f"Most time consuming task(s): {h} hours, {m} minutes")
-        print(f"{task}")
+def main(filename: str):
+    """Run all parser functions."""
+    result = []
+    records, total_time = parse_log(filename)
+    h, m = divmod(total_time, 60)
+    result.append(f"Total time spent: {h} hours and {m} minutes")
+    h, m = divmod(total_time // len(records), 60)
+    result.append(f"Average time spent per day: {h} hours and {m} minutes")
+    maxtime, task = longest_task(records)
+    h, m = divmod(maxtime, 60)
+    result.append(f"Most time consuming task(s): {task} - {h} hours, {m} minutes")
+    return "\n".join(result)
 
 
 if __name__ == "__main__":
-    main()
+    args = argparser().parse_args()
+    if os.path.exists(os.path.abspath(args.filename)):
+        main(args.filename)
+        sys.exit(0)
+    sys.exit(-1)
