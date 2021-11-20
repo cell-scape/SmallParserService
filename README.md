@@ -596,3 +596,10 @@ def parse_timelog():
 ![rest_service](images/rest_service_response.png)
 
 ![flask_response](images/flask_rest_response.png)
+
+#### In the Cloud
+
+- I am running my app on Google Cloud Platform
+
+![gcp](images/gcp_dashboard.png)
+
