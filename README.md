@@ -395,13 +395,15 @@ I was able to run a Flask service on Google Cloud Platform using an Ubuntu Linux
 
 I experimented with several approaches during development of the web service:
 
-### Simply using the Flask Development Web Server for all components of the web application
+Simply using the Flask Development Web Server
+---
 
 - This worked well at first, and was definitely the easiest way to get started working on the local machine.
 - For an application with very little traffic, it worked fine both on the cloud machine and locally.
   - Flask's development server is not intended for production use, however, and I wanted to try to move into a production web server.
 
-### Using uWSGI and Apache:
+Using uWSGI and Apache:
+---
 
 - uWSGI is a WSGI module written especially for python. It is very simple and easy to use, and integrates very well into both Django and Flask applications.
 - It is often the go-to WSGI module to connect to a better server than the flask server.
@@ -422,7 +424,8 @@ vacuum = true
 die-on-term = true
 ```
 
-### Using Gunicorn and Nginx
+Using Gunicorn and Nginx
+---
 
 - Gunicorn is a WSGI module for many languages that I used to connect the Flask application to the NGINX web server.
   - Gunicorn is a very high quality WSGI module with a very consistent and usable API.
@@ -443,7 +446,10 @@ user = bradd
 - Lacking certificates other than self-signed, it is ultimately not much better than regular HTTP.
 - SSL Configuration was very complex.
 
-### NGINX Basic Configuration
+NGINX Basic Configuration
+---
+
+- Sets up a basic reverse proxy for WSGI
 
 ```conf
 worker_processes 1;
@@ -519,7 +525,8 @@ http {
 }
 ```
 
-### Dockerizing the Application
+Dockerizing the Application
+---
 
 - Finally, I experimented with containerizing the application in order to simplify redeployment.
 - The Docker configuration was kept very simple because I have had limited experience in actually creating my own containers.
@@ -536,13 +543,15 @@ ENTRYPOINT [ "python" ]
 CMD [ "app.py" ]
 ```
 
-#### Flask App
+Flask App
+---
 
 - The actual Flask web service code was very simple compared to all the configuration that was required around it in the operating system and with the many different services required to actually host and keep the service alive.
 - Here is the primary endpoint used to upload the file, which automatically displays the results after upload.
 - Uploaded files are kept in a directory on the server.
 
-#### File Upload Endpoint
+File Upload Endpoint
+---
 
 ```python
 @app.route('/upload_file', methods=['GET', 'POST'])
@@ -573,7 +582,8 @@ def allowed_file(f: str) -> bool:
 
 ![file_upload_response](images/time_log_upload_results.png)
 
-#### REST Service
+REST Service
+---
 
 - I also set up an endpoint to function as a REST service.
 - You can send the timelog as a JSON array of strings.
@@ -597,9 +607,25 @@ def parse_timelog():
 
 ![flask_response](images/flask_rest_response.png)
 
-#### In the Cloud
+On the Cloud
+---
 
 - I am running my app on Google Cloud Platform
 
 ![gcp](images/gcp_dashboard.png)
 
+- I have a static IP address reserved for the time being at 34.70.131.103
+- Port 80 is open
+- There is an unresolved bug in file uploads.
+- The REST service is working well
+- Using Gunicorn and running a proxy through NGINX
+
+![gcp](images/gunicorn_proxy.png)
+
+![gcp](images/nginx_reverse_proxy.png)
+
+- The REST service is accessible at http://34.70.131.103/parse_timelog
+- The `request.py` script will allow you to test it easily.
+- The command is `python request.py -f ./logs/TimeLogCarbon.txt -u 34.70.131.103 -p 80 -e parse_timelog`
+
+![gcp](images/rest_service_gcp.png)
