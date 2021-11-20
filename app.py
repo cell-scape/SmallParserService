@@ -6,16 +6,19 @@ SmallParserService
 Flask web service to run the SmallParser application from GCP as a REST service
 """
 
+import json
 from pathlib import Path
 
-from flask import Flask, flash, request, redirect, render_template
+from flask import Flask, flash, request, redirect, render_template, jsonify
 from werkzeug.utils import secure_filename
 
-from tlparser import main as parse_timelog
+from tlparser import main, parse_timelog, record_stats, format_output
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "./uploads"
 ALLOWED_EXTENSIONS = {'txt'}
+
 
 @app.route('/', methods=['GET'])
 def home():
@@ -35,17 +38,22 @@ def upload_file():
             return redirect(request.url)
         if f and allowed_file(f.filename):
             filepath = Path(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
-            file.save(filepath)
-            results = parse_timelog(filepath)
+            f.save(filepath.absolute())
+            results = main(filepath.absolute())
             return render_template("display_results.html", results=results)
     return render_template("file_upload.html")
 
 
-@app.route('/parse_json_timelog', methods=['POST'])
+@app.route('/parse_timelog', methods=['POST'])
 def parse_json_timelog():
     """Parse timelog as JSON"""
     if request.method == 'POST':
-        
+        timelog = json.loads(request.json)
+        records, total = parse_timelog(timelog['timelog'])
+        stats = record_stats(records, total, timelog['filename'])
+        output = format_output(stats)
+        return jsonify(output)
+    return render_template("index.html")
 
 
 def allowed_file(f: str) -> bool:

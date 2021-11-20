@@ -70,7 +70,7 @@ def to_days(d: str) -> int:
 
     input:
         - d: a string representing a validated date
-    output: 
+    output:
         - int: days into the current century
 
     Days = (total days of n-1 months) + days + (total days of n-1 years) + leap years
