@@ -9,7 +9,7 @@ Flask web service to run the SmallParser application from GCP as a REST service
 import json
 from pathlib import Path
 
-from flask import Flask, flash, request, redirect, render_template, jsonify
+from flask import Flask, flash, request, redirect, render_template, jsonify, make_response
 from werkzeug.utils import secure_filename
 
 import tlparser as tlp
@@ -48,15 +48,15 @@ def upload_file():
     return render_template("file_upload.html")
 
 
-@app.route('/parse_timelog', methods=['POST'])
-def parse_json_timelog():
+@app.route('/parse_timelog_json', methods=['GET', 'POST'])
+def parse_timelog_json():
     """Parse timelog as JSON"""
     if request.method == 'POST':
         timelog = json.loads(request.json)
         records, total = tlp.parse_timelog(timelog['timelog'])
         stats = tlp.record_stats(records, total, timelog['filename'])
-        output = tlp.format_output(stats)
-        return jsonify(output)
+        results = {'output': tlp.format_output(stats)}
+        return make_response(jsonify(results), 200)
     return render_template("index.html")
 
 
