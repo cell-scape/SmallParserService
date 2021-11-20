@@ -414,14 +414,11 @@ I experimented with several approaches during development of the web service:
 ```conf
 [uwsgi]
 module = wsgi:app
-
 master = true
 processes = 5
-
 socket = smallparser.sock
 chmod-socket = 660
 vacuum = true
-
 die-on-term = true
 ```
 
@@ -531,8 +528,8 @@ http {
 
 ```docker
 FROM python:alpine3.7
-COPY . /smallparser
-WORKDIR /smallparser
+COPY . /app
+WORKDIR /app
 RUN pip install -r requirements.txt
 EXPOSE 80
 ENTRYPOINT [ "python" ]
@@ -544,6 +541,8 @@ CMD [ "app.py" ]
 - The actual Flask web service code was very simple compared to all the configuration that was required around it in the operating system and with the many different services required to actually host and keep the service alive.
 - Here is the primary endpoint used to upload the file, which automatically displays the results after upload.
 - Uploaded files are kept in a directory on the server.
+
+#### File Upload Endpoint
 
 ```python
 @app.route('/upload_file', methods=['GET', 'POST'])
@@ -569,3 +568,31 @@ def allowed_file(f: str) -> bool:
     """Check if file type is allowed."""
     return '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 ```
+
+![file_upload_page](images/upload_file_button.png)
+
+![file_upload_response](images/time_log_upload_results.png)
+
+#### REST Service
+
+- I also set up an endpoint to function as a REST service.
+- You can send the timelog as a JSON array of strings.
+- It will respond with the statistics output.
+- The `request.py` script can be used to test.
+
+```python
+@app.route('/parse_timelog', methods=['GET', 'POST'])
+def parse_timelog():
+    """Parse timelog as JSON"""
+    if request.method == 'POST':
+        timelog = json.loads(request.json)
+        records, total = tlp.parse_log(timelog['timelog'])
+        stats = tlp.record_stats(records, total, timelog['filename'])
+        results = {'output': tlp.format_output(stats)}
+        return make_response(jsonify(results), 200)
+    return render_template("index.html")
+```
+
+![rest_service](images/rest_service_response.png)
+
+![flask_response](images/flask_rest_response.png)

@@ -4,7 +4,9 @@
     <body>
         <h1>Time Log Results</h1>
         {% if results %}
-            <p>{{results}}</p>
+            {% for line in results %}
+                <p>{{line}}</p>
+            {% endfor %}
         {% else %}
             <p>No results</p>
         {% endif %}

@@ -44,7 +44,7 @@ if __name__ == "__main__":
     for filename in args.files:
         f = Path(filename)
         if f.exists() and f.is_file():
-            rc = main(f)
+            rc = main(f, args.url, args.port, args.endpoint)
             print(f"Response Code: {rc}")
             if rc == 200:
                 continue

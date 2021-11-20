@@ -43,7 +43,7 @@ def upload_file():
                 timelog = log.readlines()
             records, total = tlp.parse_log(timelog)
             stats = tlp.record_stats(records, total, filepath.name)
-            results = "\n".join(tlp.format_output(stats))
+            results = tlp.format_output(stats)
             return render_template("display_results.html", results=results)
     return render_template("file_upload.html")
 
