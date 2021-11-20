@@ -41,19 +41,19 @@ def upload_file():
             f.save(filepath.absolute())
             with open(filepath.absolute()) as log:
                 timelog = log.readlines()
-            records, total = tlp.parse_timelog(timelog)
+            records, total = tlp.parse_log(timelog)
             stats = tlp.record_stats(records, total, filepath.name)
             results = "\n".join(tlp.format_output(stats))
             return render_template("display_results.html", results=results)
     return render_template("file_upload.html")
 
 
-@app.route('/parse_timelog_json', methods=['GET', 'POST'])
-def parse_timelog_json():
+@app.route('/parse_timelog', methods=['GET', 'POST'])
+def parse_timelog():
     """Parse timelog as JSON"""
     if request.method == 'POST':
         timelog = json.loads(request.json)
-        records, total = tlp.parse_timelog(timelog['timelog'])
+        records, total = tlp.parse_log(timelog['timelog'])
         stats = tlp.record_stats(records, total, timelog['filename'])
         results = {'output': tlp.format_output(stats)}
         return make_response(jsonify(results), 200)
