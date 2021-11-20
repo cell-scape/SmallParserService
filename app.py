@@ -11,11 +11,13 @@ from pathlib import Path
 
 from flask import Flask, flash, request, redirect, render_template, jsonify, make_response
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import tlparser as tlp
 
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.config['UPLOAD_FOLDER'] = "./uploads"
 ALLOWED_EXTENSIONS = {'txt'}
 
@@ -66,4 +68,4 @@ def allowed_file(f: str) -> bool:
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0")
