@@ -41,6 +41,13 @@ def upload_file():
     return render_template("file_upload.html")
 
 
+@app.route('/parse_json_timelog', methods=['POST'])
+def parse_json_timelog():
+    """Parse timelog as JSON"""
+    if request.method == 'POST':
+        
+
+
 def allowed_file(f: str) -> bool:
     """Check if file type is allowed."""
     return '.' in f and f.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

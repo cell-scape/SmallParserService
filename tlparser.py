@@ -162,31 +162,29 @@ def parse_line(line: str) -> dict:
     return data
 
 
-def parse_log(filename: str) -> tuple:
+def parse_log(timelog: list) -> tuple:
     """
-    parse_log(filename: str) -> tuple
+    parse_log(timelog: list) -> tuple
 
     input:
-        - filename: a path to a time log file
+        - timelog: list of lines of timelog file
     output:
         - (time_records, total_time): a tuple of time_records, and the total accumulated time
 
     time_record -> (date, time spent, accumulated comments)
 
-    Parses the time log file by checking the number of valid tokens in each line.
+    Parses the time log by checking the number of valid tokens in each line.
     Accumulates total time, and saves individual times for each date/task.
     Multiline comments are accumulated together, blank dates are assumed to be the same.
     """
-    with open(filename) as f:
-        lines = f.readlines()
-    if lines[0].lower().strip() != "time log:":
+    if timelog[0].lower().strip() != "time log:":
         return -1
     time_record = []
     cur_comment = []
     cur_date = ""
     cur_total = 0
     total_time = 0
-    for i, line in enumerate(lines[1:]):
+    for i, line in enumerate(timelog[1:]):
         try:
             parsed = parse_line(line)
             nkeys = len(parsed.keys())
@@ -330,9 +328,11 @@ def argparser():
     return ap
 
 
-def main(f: Path) -> str:
+def main(filename: Path) -> str:
     """Run all parser functions."""
-    records, total = parse_log(f.absolute())
+    with open(filename.absolute()) as f:
+        timelog = f.readlines()
+    records, total = parse_log(timelog)
     stats = record_stats(records, total, f.name)
     results = format_output(stats)
     return "\n".join(results)
