@@ -12,7 +12,7 @@ from pathlib import Path
 from flask import Flask, flash, request, redirect, render_template, jsonify
 from werkzeug.utils import secure_filename
 
-from tlparser import main, parse_timelog, record_stats, format_output
+import tlparser as tlp
 
 
 app = Flask(__name__)
@@ -39,7 +39,11 @@ def upload_file():
         if f and allowed_file(f.filename):
             filepath = Path(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
             f.save(filepath.absolute())
-            results = main(filepath.absolute())
+            with open(filepath.absolute()) as log:
+                timelog = log.readlines()
+            records, total = tlp.parse_timelog(timelog)
+            stats = tlp.record_stats(records, total, filepath.name)
+            results = "\n".join(tlp.format_output(stats))
             return render_template("display_results.html", results=results)
     return render_template("file_upload.html")
 
@@ -49,9 +53,9 @@ def parse_json_timelog():
     """Parse timelog as JSON"""
     if request.method == 'POST':
         timelog = json.loads(request.json)
-        records, total = parse_timelog(timelog['timelog'])
-        stats = record_stats(records, total, timelog['filename'])
-        output = format_output(stats)
+        records, total = tlp.parse_timelog(timelog['timelog'])
+        stats = tlp.record_stats(records, total, timelog['filename'])
+        output = tlp.format_output(stats)
         return jsonify(output)
     return render_template("index.html")
 
